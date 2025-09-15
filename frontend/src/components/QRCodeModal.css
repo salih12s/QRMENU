@@ -1,0 +1,89 @@
+.qr-modal {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+}
+
+.qr-content {
+  padding: 20px;
+}
+
+.qr-display {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.qr-code-image {
+  width: 250px;
+  height: 250px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: white;
+}
+
+.qr-info {
+  margin-bottom: 20px;
+}
+
+.qr-info p {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.url-display {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  color: #495057;
+  margin-bottom: 15px;
+}
+
+.qr-instructions {
+  background: #e7f3ff;
+  border: 1px solid #bee5eb;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  color: #0c5460;
+  margin: 0;
+}
+
+.qr-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #6c757d;
+  border: 2px solid #6c757d;
+}
+
+.btn-outline:hover {
+  background: #6c757d;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .qr-modal {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .qr-code-image {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .qr-actions {
+    flex-direction: column;
+  }
+}
