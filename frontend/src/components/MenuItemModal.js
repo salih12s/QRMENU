@@ -1,5 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import './MenuItemModal.css';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Alert,
+  CircularProgress,
+  Switch,
+  FormControlLabel,
+  Card,
+  CardMedia,
+  IconButton,
+  Chip,
+  Grid,
+  InputAdornment,
+  Divider,
+} from '@mui/material';
+import {
+  Close as CloseIcon,
+  PhotoCamera as PhotoCameraIcon,
+  Delete as DeleteIcon,
+  Restaurant as RestaurantIcon,
+  AttachMoney as MoneyIcon,
+  Description as DescriptionIcon,
+  Sort as SortIcon,
+} from '@mui/icons-material';
 
 const MenuItemModal = ({ item, category, onSave, onClose }) => {
   const [formData, setFormData] = useState({
@@ -30,6 +59,18 @@ const MenuItemModal = ({ item, category, onSave, onClose }) => {
         setImagePreview(item.image_url);
         setImageData(item.image_url);
       }
+    } else {
+      // Yeni item için temizle
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        allergens: '',
+        sort_order: 0,
+        is_available: true
+      });
+      setImagePreview(null);
+      setImageData(null);
     }
   }, [item]);
 
@@ -69,7 +110,7 @@ const MenuItemModal = ({ item, category, onSave, onClose }) => {
   const removeImage = () => {
     setImagePreview(null);
     setImageData(null);
-    const fileInput = document.getElementById('image');
+    const fileInput = document.getElementById('image-upload');
     if (fileInput) fileInput.value = '';
   };
 
@@ -90,6 +131,7 @@ const MenuItemModal = ({ item, category, onSave, onClose }) => {
       }
       
       await onSave(dataToSave);
+      onClose();
     } catch (error) {
       setError(error.response?.data?.message || 'Kayıt sırasında hata oluştu');
     } finally {
@@ -98,144 +140,285 @@ const MenuItemModal = ({ item, category, onSave, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-header">
-          <h2>{item ? 'Ürün Düzenle' : `Yeni Ürün${category ? ` - ${category.name}` : ''}`}</h2>
-          <button onClick={onClose} className="close-btn">✕</button>
-        </div>
+    <Dialog 
+      open={true} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: 3 }
+      }}
+    >
+      <DialogTitle sx={{ 
+        background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <RestaurantIcon sx={{ mr: 1 }} />
+          <Typography variant="h6">
+            {item ? 'Ürün Düzenle' : `Yeni Ürün${category ? ` - ${category.name}` : ''}`}
+          </Typography>
+        </Box>
+        <IconButton 
+          onClick={onClose} 
+          sx={{ color: 'white' }}
+          disabled={loading}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="name">Ürün Adı *</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                disabled={loading}
-                placeholder="ör. Izgara Tavuk"
-              />
-            </div>
+      <form onSubmit={handleSubmit}>
+        <DialogContent sx={{ p: 3 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-            <div className="form-group">
-              <label htmlFor="price">Fiyat (₺) *</label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                disabled={loading}
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description">Açıklama</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-              disabled={loading}
-              placeholder="Ürün açıklaması..."
-            />
-          </div>
-
-          {/* Fotoğraf Upload Alanı */}
-          <div className="form-group">
-            <label htmlFor="image">Ürün Fotoğrafı</label>
-            <input
-              type="file"
-              id="image"
-              name="image"
-              accept="image/*"
-              onChange={handleImageChange}
-              disabled={loading}
-              className="file-input"
-            />
-            <small>Maksimum 5MB, JPG, PNG, GIF formatları desteklenir</small>
-            
-            {imagePreview && (
-              <div className="image-preview">
-                <img src={imagePreview} alt="Önizleme" />
-                <button 
-                  type="button" 
-                  onClick={removeImage}
-                  className="remove-image-btn"
+          <Grid container spacing={3}>
+            {/* Ürün Bilgileri */}
+            <Grid item xs={12} md={imagePreview ? 8 : 12}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" color="primary" gutterBottom>
+                  Ürün Bilgileri
+                </Typography>
+                
+                <TextField
+                  fullWidth
+                  name="name"
+                  label="Ürün Adı"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                   disabled={loading}
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
+                  margin="normal"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <RestaurantIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
 
-          <div className="form-group">
-            <label htmlFor="allergens">Alerjenler</label>
-            <input
-              type="text"
-              id="allergens"
-              name="allergens"
-              value={formData.allergens}
-              onChange={handleChange}
-              disabled={loading}
-              placeholder="ör. Gluten, Süt, Yumurta"
-            />
-            <small>Alerjen bilgilerini virgülle ayırın</small>
-          </div>
+                <TextField
+                  fullWidth
+                  name="price"
+                  label="Fiyat (₺)"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  margin="normal"
+                  inputProps={{ min: "0", step: "0.01" }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <MoneyIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="sort_order">Sıralama</label>
-              <input
-                type="number"
-                id="sort_order"
-                name="sort_order"
-                value={formData.sort_order}
-                onChange={handleChange}
-                disabled={loading}
-                min="0"
-              />
-              <small>Düşük sayı önce görünür</small>
-            </div>
-
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="is_available"
-                  checked={formData.is_available}
+                <TextField
+                  fullWidth
+                  name="description"
+                  label="Açıklama"
+                  multiline
+                  rows={3}
+                  value={formData.description}
                   onChange={handleChange}
                   disabled={loading}
+                  margin="normal"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <DescriptionIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
-                Mevcut
-              </label>
-            </div>
-          </div>
 
-          {error && <div className="error-message">{error}</div>}
+                <TextField
+                  fullWidth
+                  name="allergens"
+                  label="Alerjenler"
+                  value={formData.allergens}
+                  onChange={handleChange}
+                  disabled={loading}
+                  margin="normal"
+                  helperText="Alerjen bilgilerini virgülle ayırın"
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
+              </Box>
 
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} className="btn btn-secondary" disabled={loading}>
-              İptal
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Kaydediliyor...' : 'Kaydet'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <Divider sx={{ my: 2 }} />
+
+              {/* Ayarlar */}
+              <Box>
+                <Typography variant="h6" color="primary" gutterBottom>
+                  Ayarlar
+                </Typography>
+                
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      name="sort_order"
+                      label="Sıralama"
+                      type="number"
+                      value={formData.sort_order}
+                      onChange={handleChange}
+                      disabled={loading}
+                      inputProps={{ min: "0" }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SortIcon color="primary" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      helperText="Düşük sayı önce görünür"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={formData.is_available}
+                          onChange={handleChange}
+                          name="is_available"
+                          disabled={loading}
+                          color="primary"
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography>Mevcut</Typography>
+                          <Chip 
+                            label={formData.is_available ? 'Aktif' : 'Pasif'} 
+                            color={formData.is_available ? 'success' : 'error'}
+                            size="small"
+                            sx={{ ml: 1 }}
+                          />
+                        </Box>
+                      }
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+
+            {/* Resim Yükleme */}
+            <Grid item xs={12} md={imagePreview ? 4 : 12}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" color="primary" gutterBottom>
+                  Ürün Fotoğrafı
+                </Typography>
+                
+                <input
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  id="image-upload"
+                  type="file"
+                  onChange={handleImageChange}
+                  disabled={loading}
+                />
+                
+                <label htmlFor="image-upload">
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={<PhotoCameraIcon />}
+                    fullWidth
+                    disabled={loading}
+                    sx={{ 
+                      borderRadius: 2,
+                      py: 1.5,
+                      mb: 2,
+                      borderStyle: 'dashed',
+                      borderWidth: 2,
+                    }}
+                  >
+                    Fotoğraf Seç
+                  </Button>
+                </label>
+
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+                  Maksimum 5MB, JPG, PNG, GIF formatları desteklenir
+                </Typography>
+
+                {imagePreview && (
+                  <Card sx={{ position: 'relative', borderRadius: 2 }}>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={imagePreview}
+                      alt="Ürün önizleme"
+                      sx={{ objectFit: 'cover' }}
+                    />
+                    <IconButton
+                      onClick={removeImage}
+                      disabled={loading}
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        },
+                      }}
+                    >
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  </Card>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3, backgroundColor: '#f5f5f5' }}>
+          <Button 
+            onClick={onClose} 
+            disabled={loading}
+            color="inherit"
+            sx={{ borderRadius: 2 }}
+          >
+            İptal
+          </Button>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={loading}
+            sx={{ 
+              borderRadius: 2,
+              minWidth: 120,
+              background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #1b5e20 0%, #388e3c 100%)',
+              },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Kaydet'
+            )}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 };
 
