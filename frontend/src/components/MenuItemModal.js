@@ -55,9 +55,10 @@ const MenuItemModal = ({ item, category, onSave, onClose }) => {
         is_available: item.is_available !== false
       });
       // Mevcut resim varsa önizleme olarak göster (base64 formatında)
-      if (item.image_url) {
-        setImagePreview(item.image_url);
-        setImageData(item.image_url);
+      if (item.image_url || item.image) {
+        const imageData = item.image_url || item.image;
+        setImagePreview(imageData);
+        setImageData(imageData);
       }
     } else {
       // Yeni item için temizle
