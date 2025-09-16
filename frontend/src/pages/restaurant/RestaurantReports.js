@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   Grid,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -22,8 +21,6 @@ import {
   Stack,
   useTheme,
   alpha,
-  IconButton,
-  Tooltip
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,

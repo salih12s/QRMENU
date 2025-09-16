@@ -56,7 +56,7 @@ const theme = createTheme({
   },
 });
 
-const PublicMenu = () => {
+const PublicMenuNew = () => {
   const { qrCode } = useParams();
   const [menuData, setMenuData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -100,20 +100,15 @@ const PublicMenu = () => {
 
   // Kategori icon'larını belirle
   const getCategoryIcon = (categoryName) => {
-    const iconStyles = { 
-      fontSize: { xs: 32, sm: 40, md: 48 }, 
-      color: 'white' 
-    };
-    
     const name = categoryName.toLowerCase();
     if (name.includes('ana yemek') || name.includes('yemek') || name.includes('main')) {
-      return <LocalDiningIcon sx={iconStyles} />;
+      return <LocalDiningIcon sx={{ fontSize: 40, color: 'white' }} />;
     } else if (name.includes('içecek') || name.includes('drink') || name.includes('beverage')) {
-      return <LocalBarIcon sx={iconStyles} />;
+      return <LocalBarIcon sx={{ fontSize: 40, color: 'white' }} />;
     } else if (name.includes('tatlı') || name.includes('dessert') || name.includes('sweet')) {
-      return <CakeIcon sx={iconStyles} />;
+      return <CakeIcon sx={{ fontSize: 40, color: 'white' }} />;
     } else {
-      return <RestaurantIcon sx={iconStyles} />;
+      return <RestaurantIcon sx={{ fontSize: 40, color: 'white' }} />;
     }
   };
 
@@ -183,100 +178,57 @@ const PublicMenu = () => {
           }}
         >
           <Container maxWidth="lg">
-            <Box sx={{ py: { xs: 3, sm: 4, md: 6 }, textAlign: 'center', position: 'relative', zIndex: 1 }}>
+            <Box sx={{ py: { xs: 4, sm: 6 }, textAlign: 'center', position: 'relative', zIndex: 1 }}>
               <Box sx={{ 
-                fontSize: { xs: 50, sm: 60, md: 80 }, 
-                mb: { xs: 1.5, sm: 2 },
+                fontSize: { xs: 60, sm: 80 }, 
+                mb: 2,
                 '& > span': { 
                   display: 'inline-block',
                   background: 'rgba(255,255,255,0.2)',
                   borderRadius: '50%',
-                  width: { xs: 60, sm: 80, md: 100 },
-                  height: { xs: 60, sm: 80, md: 100 },
-                  lineHeight: { xs: '60px', sm: '80px', md: '100px' },
+                  width: { xs: 80, sm: 100 },
+                  height: { xs: 80, sm: 100 },
+                  lineHeight: { xs: '80px', sm: '100px' },
                   margin: '0 auto'
                 }
               }}>
                 <span>🍽️</span>
               </Box>
-              <Typography 
-                variant="h3" 
-                fontWeight="bold" 
-                gutterBottom
-                sx={{
-                  fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' }
-                }}
-              >
+              <Typography variant="h3" fontWeight="bold" gutterBottom>
                 {menuData?.restaurant?.name || 'MSSCAFE'}
               </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  opacity: 0.9,
-                  fontSize: { xs: '1rem', sm: '1.125rem', md: '1.25rem' }
-                }}
-              >
+              <Typography variant="h6" sx={{ opacity: 0.9 }}>
                 {menuData?.restaurant?.description || 'MSSCAFE VE RESTORANT'}
               </Typography>
             </Box>
           </Container>
         </Paper>
 
-        <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 }, px: { xs: 1.5, sm: 3 } }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 } }}>
           {!showCategoryView ? (
             // Ana Kategori Görünümü
             <Box>
-              <Typography 
-                variant="h4" 
-                fontWeight="bold" 
-                textAlign="center" 
-                sx={{ 
-                  mb: { xs: 3, sm: 4 }, 
-                  color: 'text.primary',
-                  fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' }
-                }}
-              >
+              <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4, color: 'text.primary' }}>
                 Menü Kategorileri
               </Typography>
               
-              <Grid 
-                container 
-                spacing={{ xs: 2, sm: 3, md: 4 }} 
-                sx={{
-                  justifyContent: { xs: 'stretch', sm: 'stretch', md: 'center' }
-                }}
-                alignItems="stretch"
-              >
+              <Grid container spacing={3} justifyContent="center">
                 {menuData?.categories?.map((category) => (
-                  <Grid 
-                    item 
-                    xs={12} 
-                    sm={12} 
-                    md={4} 
-                    key={category.id} 
-                    sx={{ 
-                      display: 'flex', 
-                      justifyContent: { xs: 'stretch', sm: 'stretch', md: 'center' },
-                      width: '100%'
-                    }}
-                  >
+                  <Grid item xs={12} sm={6} md={4} key={category.id}>
                     <Card
                       onClick={() => handleCategorySelect(category)}
                       sx={{
-                        height: { xs: 160, sm: 180, md: 200 },
-                        width: '100%', // Her durumda container'ın tam genişliği
+                        minHeight: 200,
                         cursor: 'pointer',
-                        borderRadius: { xs: 3, sm: 4 },
+                        borderRadius: 4,
                         background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
                         color: 'white',
                         position: 'relative',
                         overflow: 'hidden',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        display: 'flex',
-                        flexDirection: 'column',
                         '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: '0 8px 20px rgba(76, 175, 80, 0.4)',
+                          transform: 'translateY(-8px)',
+                          boxShadow: '0 12px 24px rgba(76, 175, 80, 0.3)',
                         },
                         '&::before': {
                           content: '""',
@@ -292,7 +244,7 @@ const PublicMenu = () => {
                     >
                       <CardContent 
                         sx={{ 
-                          p: { xs: 1.5, sm: 3, md: 4 },
+                          p: 4, 
                           textAlign: 'center',
                           display: 'flex',
                           flexDirection: 'column',
@@ -300,31 +252,14 @@ const PublicMenu = () => {
                           alignItems: 'center',
                           height: '100%',
                           position: 'relative',
-                          zIndex: 1,
-                          flex: 1
+                          zIndex: 1
                         }}
                       >
-                        <Box sx={{ mb: { xs: 1, sm: 2 } }}>
-                          {getCategoryIcon(category.name)}
-                        </Box>
-                        <Typography 
-                          variant={{ xs: 'h6', sm: 'h5' }} 
-                          fontWeight="bold" 
-                          sx={{ 
-                            mb: { xs: 0.5, sm: 1 },
-                            fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
-                            lineHeight: 1.2
-                          }}
-                        >
+                        {getCategoryIcon(category.name)}
+                        <Typography variant="h5" fontWeight="bold" sx={{ mt: 2, mb: 1 }}>
                           {category.name}
                         </Typography>
-                        <Typography 
-                          variant="body1" 
-                          sx={{ 
-                            opacity: 0.9,
-                            fontSize: { xs: '0.875rem', sm: '1rem' }
-                          }}
-                        >
+                        <Typography variant="body1" sx={{ opacity: 0.9 }}>
                           {category.menu_items?.length || 0} ürün
                         </Typography>
                       </CardContent>
@@ -337,35 +272,24 @@ const PublicMenu = () => {
             // Kategori Detay Görünümü
             <Box>
               {/* Geri Dönüş Butonu */}
-              <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+              <Box sx={{ mb: 3 }}>
                 <Button
                   startIcon={<ArrowBackIcon />}
                   onClick={handleBackToCategories}
                   variant="outlined"
-                  size="large"
                   sx={{
-                    borderRadius: { xs: 2, sm: 3 },
+                    borderRadius: 3,
                     textTransform: 'none',
                     fontWeight: 600,
-                    py: { xs: 1, sm: 1.5 },
-                    px: { xs: 2, sm: 3 },
-                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                    py: 1.5,
+                    px: 3
                   }}
                 >
                   Kategorilere Geri Dön
                 </Button>
               </Box>
 
-              <Typography 
-                variant="h4" 
-                fontWeight="bold" 
-                textAlign="center" 
-                sx={{ 
-                  mb: { xs: 3, sm: 4 }, 
-                  color: 'primary.main',
-                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' }
-                }}
-              >
+              <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4, color: 'primary.main' }}>
                 {selectedCategory?.name}
               </Typography>
 
@@ -541,4 +465,4 @@ const PublicMenu = () => {
   );
 };
 
-export default PublicMenu;
+export default PublicMenuNew;
