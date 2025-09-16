@@ -1,19 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { reportsService } from '../../services/reportsService';
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  TextField,
+  CircularProgress,
+  Alert,
+  Chip,
+  IconButton,
+  Paper,
+  Divider,
+  Stack,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import {
+  Refresh as RefreshIcon,
+  TrendingUp as TrendingUpIcon,
+  Restaurant as RestaurantIcon,
+  MenuBook as MenuBookIcon,
+  Category as CategoryIcon,
+  Visibility as ViewsIcon,
+  Star as StarIcon,
+  DateRange as DateIcon,
+  Assessment as ReportIcon
+} from '@mui/icons-material';
 
 const SystemReports = () => {
   const [reports, setReports] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [dateRange, setDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
 
-  useEffect(() => {
-    loadReports();
-  }, []);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     try {
       setLoading(true);
       const data = await reportsService.getSuperAdminReports(
@@ -26,7 +62,11 @@ const SystemReports = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange.startDate, dateRange.endDate]);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   const handleDateChange = (e) => {
     setDateRange({
@@ -35,132 +75,371 @@ const SystemReports = () => {
     });
   };
 
-  const handleRefresh = () => {
-    loadReports();
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadReports();
+    setTimeout(() => setRefreshing(false), 500);
   };
 
+  // Simple Stat Card
+  const StatCard = ({ title, value, subtitle, icon, color }) => (
+    <Card 
+      sx={{ 
+        height: '100%',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: 2
+        }
+      }}
+    >
+      <CardContent sx={{ textAlign: 'center', py: 3 }}>
+        <Box sx={{ color, mb: 2 }}>
+          {icon}
+        </Box>
+        
+        <Typography variant="h4" component="div" fontWeight="bold" color={color} mb={1}>
+          {value?.toLocaleString() || '0'}
+        </Typography>
+        
+        <Typography variant="h6" color="text.primary" fontWeight="medium" mb={1}>
+          {title}
+        </Typography>
+        
+        {subtitle && (
+          <Typography variant="body2" color="text.secondary">
+            {subtitle}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Simple Report Table
+  const ReportTable = ({ title, data, columns, icon }) => (
+    <Card>
+      <CardContent>
+        <Box display="flex" alignItems="center" mb={3}>
+          <Box sx={{ color: 'primary.main', mr: 2 }}>
+            {icon}
+          </Box>
+          <Typography variant="h6" fontWeight="bold">
+            {title}
+          </Typography>
+        </Box>
+        
+        <TableContainer component={Paper} variant="outlined">
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.50' }}>
+                {columns.map((column) => (
+                  <TableCell 
+                    key={column.key}
+                    sx={{ fontWeight: 'bold' }}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data?.slice(0, 10).map((row, index) => (
+                <TableRow 
+                  key={index}
+                  sx={{ 
+                    '&:hover': { bgcolor: 'grey.50' },
+                    '&:nth-of-type(even)': { bgcolor: 'grey.25' }
+                  }}
+                >
+                  {columns.map((column) => (
+                    <TableCell key={column.key}>
+                      {column.render ? column.render(row[column.key], row, index) : row[column.key]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
-    return <div className="loading">Yükleniyor...</div>;
+    return (
+      <Box 
+        display="flex" 
+        flexDirection="column" 
+        alignItems="center" 
+        justifyContent="center" 
+        minHeight="60vh"
+        gap={2}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="h6" color="text.secondary">
+          Raporlar yükleniyor...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="system-reports">
-      <div className="page-header">
-        <h1>Sistem Raporları</h1>
-        <button onClick={handleRefresh} className="btn btn-primary">
-          🔄 Yenile
-        </button>
-      </div>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
+      {/* Header */}
+      <Box mb={4}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <ReportIcon sx={{ color: 'primary.main', mr: 2, fontSize: 32 }} />
+          <Box>
+            <Typography variant="h4" fontWeight="bold" color="primary">
+              Sistem Raporları
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Sistem performansı ve kullanım istatistikleri
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
 
-      <div className="date-filter">
-        <div className="form-group">
-          <label>Başlangıç Tarihi:</label>
-          <input
-            type="date"
-            name="startDate"
-            value={dateRange.startDate}
-            onChange={handleDateChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Bitiş Tarihi:</label>
-          <input
-            type="date"
-            name="endDate"
-            value={dateRange.endDate}
-            onChange={handleDateChange}
-          />
-        </div>
-        <button onClick={loadReports} className="btn btn-secondary">
-          Filtrele
-        </button>
-      </div>
+      {/* Date Filter */}
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={3}>
+            <DateIcon sx={{ color: 'primary.main', mr: 2 }} />
+            <Typography variant="h6" fontWeight="bold">
+              Tarih Filtresi
+            </Typography>
+          </Box>
+          
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Başlangıç Tarihi"
+                name="startDate"
+                value={dateRange.startDate}
+                onChange={handleDateChange}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Bitiş Tarihi"
+                name="endDate"
+                value={dateRange.endDate}
+                onChange={handleDateChange}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="contained"
+                  onClick={loadReports}
+                  fullWidth={isMobile}
+                >
+                  Filtrele
+                </Button>
+                <IconButton
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  color="primary"
+                >
+                  <RefreshIcon sx={{ 
+                    animation: refreshing ? 'spin 1s linear infinite' : 'none',
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' }
+                    }
+                  }} />
+                </IconButton>
+              </Stack>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
-      {reports && (
+      {reports ? (
         <>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h3>Toplam Restoran</h3>
-              <div className="stat-value">{reports.systemStats.total_restaurants}</div>
-              <div className="stat-subtitle">Aktif: {reports.systemStats.active_restaurants}</div>
-            </div>
-            
-            <div className="stat-card">
-              <h3>Menü Öğeleri</h3>
-              <div className="stat-value">{reports.systemStats.total_menu_items}</div>
-            </div>
-            
-            <div className="stat-card">
-              <h3>Kategoriler</h3>
-              <div className="stat-value">{reports.systemStats.total_categories}</div>
-            </div>
-            
-            <div className="stat-card">
-              <h3>Toplam Görüntülenme</h3>
-              <div className="stat-value">{reports.systemStats.total_views}</div>
-            </div>
-          </div>
+          {/* Stats Grid */}
+          <Grid container spacing={3} mb={4}>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Toplam Restoran"
+                value={reports.systemStats.total_restaurants}
+                subtitle={`Aktif: ${reports.systemStats.active_restaurants}`}
+                icon={<RestaurantIcon fontSize="large" />}
+                color={theme.palette.primary.main}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Menü Öğeleri"
+                value={reports.systemStats.total_menu_items}
+                subtitle="Toplam ürün sayısı"
+                icon={<MenuBookIcon fontSize="large" />}
+                color={theme.palette.secondary.main}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Kategoriler"
+                value={reports.systemStats.total_categories}
+                subtitle="Ürün kategorileri"
+                icon={<CategoryIcon fontSize="large" />}
+                color={theme.palette.success.main}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Toplam Görüntülenme"
+                value={reports.systemStats.total_views}
+                subtitle="Menü ziyaretleri"
+                icon={<ViewsIcon fontSize="large" />}
+                color={theme.palette.info.main}
+              />
+            </Grid>
+          </Grid>
 
-          <div className="reports-grid">
-            <div className="report-section">
-              <h3>Restoran Performansı</h3>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Restoran</th>
-                      <th>Durum</th>
-                      <th>Menü Öğeleri</th>
-                      <th>Görüntülenmeler</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.restaurantPerformance.slice(0, 10).map((restaurant) => (
-                      <tr key={restaurant.id}>
-                        <td>{restaurant.name}</td>
-                        <td>
-                          <span className={`status ${restaurant.is_active ? 'active' : 'inactive'}`}>
-                            {restaurant.is_active ? 'Aktif' : 'Pasif'}
-                          </span>
-                        </td>
-                        <td>{restaurant.menu_items_count}</td>
-                        <td>{restaurant.total_views}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          <Divider sx={{ my: 4 }} />
 
-            <div className="report-section">
-              <h3>Popüler Menü Öğeleri</h3>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Ürün</th>
-                      <th>Restoran</th>
-                      <th>Kategori</th>
-                      <th>Görüntülenmeler</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.topMenuItems.slice(0, 10).map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.name}</td>
-                        <td>{item.restaurant_name}</td>
-                        <td>{item.category_name}</td>
-                        <td>{item.views}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          {/* Reports Tables */}
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <ReportTable
+                title="Restoran Performansı"
+                data={reports.restaurantPerformance}
+                icon={<TrendingUpIcon fontSize="large" />}
+                columns={[
+                  { 
+                    key: 'name', 
+                    label: 'Restoran Adı',
+                    render: (value, row, index) => (
+                      <Box>
+                        <Typography variant="body2" fontWeight="medium">
+                          #{index + 1} {value}
+                        </Typography>
+                      </Box>
+                    )
+                  },
+                  { 
+                    key: 'is_active', 
+                    label: 'Durum',
+                    render: (value) => (
+                      <Chip
+                        label={value ? 'Aktif' : 'Pasif'}
+                        color={value ? 'success' : 'error'}
+                        size="small"
+                      />
+                    )
+                  },
+                  { 
+                    key: 'menu_items_count', 
+                    label: 'Menü Öğeleri',
+                    render: (value) => (
+                      <Typography variant="body2" fontWeight="bold">
+                        {value}
+                      </Typography>
+                    )
+                  },
+                  { 
+                    key: 'total_views', 
+                    label: 'Görüntülenmeler',
+                    render: (value) => (
+                      <Typography variant="body2" color="primary" fontWeight="bold">
+                        {value?.toLocaleString() || '0'}
+                      </Typography>
+                    )
+                  }
+                ]}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <ReportTable
+                title="Popüler Menü Öğeleri"
+                data={reports.topMenuItems}
+                icon={<StarIcon fontSize="large" />}
+                columns={[
+                  { 
+                    key: 'name', 
+                    label: 'Ürün Adı',
+                    render: (value, row, index) => (
+                      <Box>
+                        <Typography variant="body2" fontWeight="medium">
+                          #{index + 1} {value}
+                        </Typography>
+                      </Box>
+                    )
+                  },
+                  { key: 'restaurant_name', label: 'Restoran' },
+                  { 
+                    key: 'category_name', 
+                    label: 'Kategori',
+                    render: (value) => (
+                      <Chip
+                        label={value}
+                        variant="outlined"
+                        size="small"
+                      />
+                    )
+                  },
+                  { 
+                    key: 'views', 
+                    label: 'Görüntülenmeler',
+                    render: (value) => (
+                      <Typography variant="body2" color="warning.main" fontWeight="bold">
+                        {value?.toLocaleString() || '0'}
+                      </Typography>
+                    )
+                  }
+                ]}
+              />
+            </Grid>
+          </Grid>
+
+          {/* Summary Stats */}
+          <Card sx={{ mt: 4 }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight="bold" mb={3}>
+                Özet İstatistikler
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Box p={2} bgcolor="primary.light" borderRadius={1}>
+                    <Typography variant="body2" color="primary.contrastText" mb={1}>
+                      Aktif Restoran Oranı
+                    </Typography>
+                    <Typography variant="h5" color="primary.contrastText" fontWeight="bold">
+                      {Math.round((reports.systemStats.active_restaurants / reports.systemStats.total_restaurants) * 100)}%
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box p={2} bgcolor="secondary.light" borderRadius={1}>
+                    <Typography variant="body2" color="secondary.contrastText" mb={1}>
+                      Ortalama Menü Büyüklüğü
+                    </Typography>
+                    <Typography variant="h5" color="secondary.contrastText" fontWeight="bold">
+                      {Math.round(reports.systemStats.total_menu_items / reports.systemStats.total_restaurants)} öğe
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </>
+      ) : (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          <Typography variant="body1">
+            Rapor verisi bulunamadı. Lütfen tarih aralığını kontrol edin ve tekrar deneyin.
+          </Typography>
+        </Alert>
       )}
-    </div>
+    </Container>
   );
 };
 
