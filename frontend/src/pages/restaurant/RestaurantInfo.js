@@ -29,7 +29,8 @@ import {
   Save as SaveIcon,
   TrendingUp,
   Visibility,
-  Assessment
+  Assessment,
+  ContentCopy as CopyIcon
 } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
 import { authService } from '../../services/authService';
@@ -54,6 +55,18 @@ const RestaurantInfo = () => {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const copyToClipboard = async () => {
+    try {
+      const menuUrl = `${window.location.origin}/menu/${restaurant.qr_code}`;
+      await navigator.clipboard.writeText(menuUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Kopyalama başarısız:', err);
+    }
+  };
 
   const loadRestaurantInfo = useCallback(async () => {
     if (!restaurantId) return;
@@ -412,6 +425,56 @@ const RestaurantInfo = () => {
                         }}
                       />
                     </Paper>
+                    
+                    {/* QR Kod URL'si */}
+                    <Box sx={{ mb: 2, px: 1 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 'medium' }}>
+                        Menü Linki:
+                      </Typography>
+                      <Paper 
+                        sx={{ 
+                          p: 1.5, 
+                          bgcolor: alpha(theme.palette.grey[100], 0.7),
+                          border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                          borderRadius: 1,
+                          position: 'relative'
+                        }}
+                      >
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            fontFamily: 'monospace',
+                            wordBreak: 'break-all',
+                            color: theme.palette.primary.main,
+                            fontWeight: 'medium',
+                            pr: 5
+                          }}
+                        >
+                          {`${window.location.origin}/menu/${restaurant.qr_code}`}
+                        </Typography>
+                        <Tooltip title={copySuccess ? "Kopyalandı!" : "Linki Kopyala"} arrow>
+                          <IconButton
+                            onClick={copyToClipboard}
+                            size="small"
+                            sx={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              color: copySuccess ? theme.palette.success.main : theme.palette.primary.main,
+                              '&:hover': {
+                                backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                              }
+                            }}
+                          >
+                            <CopyIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Paper>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                        Bu linki paylaşarak müşterileriniz menünüze erişebilir
+                      </Typography>
+                    </Box>
+                    
                     <Stack direction="row" spacing={1} justifyContent="center">
                       <Tooltip title="QR Kodu İndir">
                         <IconButton 

@@ -8,7 +8,7 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Grid,
+  Stack,
   Chip,
   Tab,
   Tabs,
@@ -16,14 +16,12 @@ import {
   CircularProgress,
   Alert,
   Avatar,
-  Divider,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
 import {
   Restaurant as RestaurantIcon,
   Warning as WarningIcon,
-  LocalOffer as PriceIcon,
   Info as InfoIcon,
   QrCode as QrCodeIcon,
 } from '@mui/icons-material';
@@ -154,43 +152,91 @@ const PublicMenu = () => {
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
         {/* Header */}
         <Paper 
-          elevation={2}
+          elevation={0}
           sx={{
-            background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+            background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #4caf50 100%)',
             color: 'white',
             borderRadius: 0,
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+              opacity: 0.3
+            }
           }}
         >
           <Container maxWidth="lg">
-            <Box sx={{ py: 4, textAlign: 'center' }}>
+            <Box sx={{ py: { xs: 4, sm: 6 }, textAlign: 'center', position: 'relative', zIndex: 1 }}>
               <Avatar
                 sx={{
-                  width: 80,
-                  height: 80,
+                  width: { xs: 80, sm: 100 },
+                  height: { xs: 80, sm: 100 },
                   mx: 'auto',
-                  mb: 2,
-                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  mb: 3,
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(10px)',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                 }}
               >
-                <RestaurantIcon sx={{ fontSize: 40 }} />
+                <RestaurantIcon sx={{ fontSize: { xs: 40, sm: 50 } }} />
               </Avatar>
-              <Typography variant="h4" component="h1" gutterBottom>
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                gutterBottom
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                  letterSpacing: '0.5px'
+                }}
+              >
                 {menuData?.restaurant?.name}
               </Typography>
               {menuData?.restaurant?.description && (
-                <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    opacity: 0.95, 
+                    fontWeight: 400,
+                    fontSize: { xs: '1rem', sm: '1.25rem' },
+                    maxWidth: 600,
+                    mx: 'auto',
+                    lineHeight: 1.5
+                  }}
+                >
                   {menuData.restaurant.description}
                 </Typography>
               )}
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <Box sx={{ mt: 3 }}>
                 <Chip
                   icon={<QrCodeIcon />}
                   label="QR Menü"
                   variant="outlined"
+                  size="large"
                   sx={{ 
                     color: 'white', 
-                    borderColor: 'rgba(255,255,255,0.5)',
-                    '& .MuiChip-icon': { color: 'white' }
+                    borderColor: 'rgba(255,255,255,0.7)',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    py: 1,
+                    '& .MuiChip-icon': { 
+                      color: 'white',
+                      fontSize: 20
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      borderColor: 'rgba(255,255,255,0.9)',
+                    }
                   }}
                 />
               </Box>
@@ -198,25 +244,32 @@ const PublicMenu = () => {
           </Container>
         </Paper>
 
-        <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 } }}>
           {/* Category Tabs */}
           {menuData?.categories && menuData.categories.length > 0 && (
-            <Paper elevation={1} sx={{ mb: 3, borderRadius: 2 }}>
+            <Paper elevation={1} sx={{ mb: { xs: 2, sm: 3 }, borderRadius: 2, overflow: 'hidden' }}>
               <Tabs
                 value={selectedCategory}
                 onChange={handleCategoryChange}
                 variant={isMobile ? "scrollable" : "fullWidth"}
                 scrollButtons="auto"
+                allowScrollButtonsMobile
                 sx={{
                   '& .MuiTab-root': {
                     textTransform: 'none',
                     fontWeight: 600,
-                    fontSize: '1rem',
-                    minHeight: 64,
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    minHeight: { xs: 56, sm: 64 },
+                    padding: { xs: '8px 12px', sm: '12px 16px' },
                   },
                   '& .Mui-selected': {
                     color: 'primary.main',
                   },
+                  '& .MuiTabs-scrollButtons': {
+                    '&.Mui-disabled': {
+                      opacity: 0.3,
+                    }
+                  }
                 }}
               >
                 {menuData.categories.map((category, index) => (
@@ -251,70 +304,147 @@ const PublicMenu = () => {
                   Bu kategoride henüz ürün bulunmuyor
                 </Alert>
               ) : (
-                <Grid container spacing={3}>
+                <Stack spacing={3}>
                   {selectedCategoryData.menu_items?.map((item) => (
-                    <Grid item xs={12} sm={6} md={4} key={item.id}>
-                      <Card
-                        sx={{
-                          height: '100%',
+                    <Card
+                      key={item.id}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row', // Mobilde de yatay
+                        borderRadius: 3,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        border: '1px solid rgba(0,0,0,0.08)',
+                        overflow: 'hidden',
+                        minHeight: { xs: 120, sm: 140 }, // Mobilde biraz daha küçük
+                        '&:hover': {
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                          transform: 'translateY(-2px)',
+                        },
+                        ...(item.is_available === false && {
+                          opacity: 0.7,
+                          filter: 'grayscale(0.5)'
+                        })
+                      }}
+                    >
+                      {/* Sol taraf - İçerik */}
+                      <Box 
+                        sx={{ 
+                          flex: 1, 
+                          p: { xs: 1.5, sm: 3 }, // Mobilde daha az padding
                           display: 'flex',
                           flexDirection: 'column',
-                          borderRadius: 3,
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: 4,
-                          },
+                          justifyContent: 'space-between'
                         }}
                       >
-                        {item.image_url && (
-                          <CardMedia
-                            component="img"
-                            height="200"
-                            image={item.image_url}
-                            alt={item.name}
-                            sx={{ objectFit: 'cover' }}
-                          />
-                        )}
-                        
-                        <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                            <Typography variant="h6" component="h3" sx={{ fontWeight: 600, flex: 1 }}>
+                        {/* Başlık ve Fiyat */}
+                        <Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Typography 
+                              variant="h6" 
+                              sx={{ 
+                                fontWeight: 700,
+                                fontSize: { xs: '0.95rem', sm: '1.25rem' }, // Mobilde daha küçük font
+                                color: 'text.primary',
+                                lineHeight: 1.3
+                              }}
+                            >
                               {item.name}
                             </Typography>
-                            <Chip
-                              icon={<PriceIcon />}
-                              label={`₺${parseFloat(item.price).toFixed(2)}`}
-                              color="primary"
-                              sx={{ ml: 1, fontWeight: 600 }}
-                            />
+                            <Typography 
+                              variant="h6" 
+                              sx={{ 
+                                fontWeight: 700,
+                                color: 'primary.main',
+                                fontSize: { xs: '0.95rem', sm: '1.25rem' }, // Mobilde daha küçük font
+                                ml: { xs: 1, sm: 2 } // Mobilde daha az margin
+                              }}
+                            >
+                              ₺{parseFloat(item.price).toFixed(2)}
+                            </Typography>
                           </Box>
-
+                          
+                          {/* Açıklama - sadece varsa göster */}
                           {item.description && (
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                color: 'text.secondary',
+                                lineHeight: 1.5,
+                                fontSize: { xs: '0.8rem', sm: '0.9rem' }, // Mobilde daha küçük
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: { xs: 2, sm: 3 },
+                                WebkitBoxOrient: 'vertical',
+                                mb: { xs: 1, sm: 0 }
+                              }}
+                            >
                               {item.description}
                             </Typography>
                           )}
+                        </Box>
 
-                          {item.allergens && (
-                            <Box sx={{ mt: 'auto' }}>
-                              <Divider sx={{ mb: 1 }} />
-                              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-                                <WarningIcon color="warning" sx={{ fontSize: 16, mr: 0.5 }} />
-                                <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
-                                  Alerjenler:
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {item.allergens}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
+                        {/* Alt bilgiler */}
+                        {item.allergens && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography 
+                              variant="caption" 
+                              sx={{ 
+                                color: 'warning.main',
+                                fontWeight: 600,
+                                fontSize: '0.75rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5
+                              }}
+                            >
+                              ⚠️ Alerjen uyarısı: {item.allergens}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Sağ taraf - Resim */}
+                      <Box 
+                        sx={{ 
+                          width: { xs: 120, sm: 200 }, // Mobilde daha küçük resim alanı
+                          height: { xs: 120, sm: 140 },
+                          position: 'relative',
+                          flexShrink: 0
+                        }}
+                      >
+                        {item.image_url ? (
+                          <CardMedia
+                            component="img"
+                            image={item.image_url}
+                            alt={item.name}
+                            sx={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: { xs: '0 12px 12px 0', sm: '0 12px 12px 0' } // Mobilde de sağ köşeler yuvarlak
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              background: 'linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: { xs: '0 12px 12px 0', sm: '0 12px 12px 0' } // Mobilde de sağ köşeler yuvarlak
+                            }}
+                          >
+                            <RestaurantIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                          </Box>
+                        )}
+                      </Box>
+                    </Card>
                   ))}
-                </Grid>
+                </Stack>
               )}
             </Box>
           )}
