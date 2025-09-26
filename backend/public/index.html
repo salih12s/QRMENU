@@ -1,1 +1,280 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#4caf50"/><meta name="description" content="MenuBen - Digital QR Menu Management System for Restaurants"/><link rel="manifest" href="./manifest.json"/><title>MenuBen - Digital QR Menu System</title><script defer="defer" src="./static/js/main.b5ad6536.js"></script><link href="./static/css/main.66cc81c6.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .restaurant-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .restaurant-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .restaurant-desc {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .category {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .category-header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .item-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .item-price {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #e74c3c;
+            background: white;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .empty-menu {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .empty-menu h2 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .empty-menu p {
+            color: #999;
+        }
+        
+        .admin-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        
+        .admin-link:hover {
+            background: #45a049;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .restaurant-name {
+                font-size: 2rem;
+            }
+            
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .item-price {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading">
+            <h2>Menü Yükleniyor...</h2>
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div class="restaurant-header">
+                <h1 id="restaurantName" class="restaurant-name"></h1>
+                <p id="restaurantDesc" class="restaurant-desc"></p>
+            </div>
+            
+            <div id="menuContainer"></div>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <h2>Menü Bulunamadı</h2>
+            <p>Bu QR kod geçersiz veya menü henüz hazırlanmamış.</p>
+        </div>
+        
+        <div id="noMenu" class="empty-menu" style="display: none;">
+            <h2>Admin Paneli</h2>
+            <p>QR Menu Yönetim Sistemi</p>
+            <a href="/static/index.html" style="display: inline-block; margin-top: 20px; background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Admin Paneline Git</a>
+        </div>
+    </div>
+
+    <script>
+        // URL parametrelerini oku
+        const params = new URLSearchParams(window.location.search);
+        const menuId = params.get("menu");
+        
+        const loadingEl = document.getElementById('loading');
+        const contentEl = document.getElementById('content');
+        const errorEl = document.getElementById('error');
+        const noMenuEl = document.getElementById('noMenu');
+        const menuContainer = document.getElementById('menuContainer');
+        
+        if (menuId) {
+            console.log("Menü ID:", menuId);
+            loadMenu(menuId);
+        } else {
+            // Menü ID yoksa admin paneli linkini göster
+            loadingEl.style.display = 'none';
+            noMenuEl.style.display = 'block';
+        }
+        
+        async function loadMenu(qrCode) {
+            try {
+                // API'den menü verilerini çek
+                const response = await fetch(`/api/menu/qr/${qrCode}`);
+                
+                if (!response.ok) {
+                    throw new Error('Menü bulunamadı');
+                }
+                
+                const data = await response.json();
+                displayMenu(data);
+                
+            } catch (error) {
+                console.error('Menü yükleme hatası:', error);
+                showError();
+            }
+        }
+        
+        function displayMenu(data) {
+            const { restaurant, categories } = data;
+            
+            // Restaurant bilgilerini göster
+            document.getElementById('restaurantName').textContent = restaurant.name;
+            document.getElementById('restaurantDesc').textContent = restaurant.description || '';
+            
+            // Kategorileri ve menü öğelerini göster
+            if (categories && categories.length > 0) {
+                menuContainer.innerHTML = categories.map(category => `
+                    <div class="category">
+                        <div class="category-header">
+                            ${category.name}
+                        </div>
+                        ${category.items && category.items.length > 0 ? 
+                            category.items.map(item => `
+                                <div class="menu-item">
+                                    <div class="item-info">
+                                        <h3>${item.name}</h3>
+                                        ${item.description ? `<p class="item-desc">${item.description}</p>` : ''}
+                                    </div>
+                                    <div class="item-price">${item.price} ₺</div>
+                                </div>
+                            `).join('') :
+                            '<div class="menu-item"><p>Bu kategoride henüz ürün bulunmuyor.</p></div>'
+                        }
+                    </div>
+                `).join('');
+            } else {
+                menuContainer.innerHTML = `
+                    <div class="empty-menu">
+                        <h2>Henüz Menü Eklenmemiş</h2>
+                        <p>Bu restoran menüsü henüz hazırlanmamış.</p>
+                    </div>
+                `;
+            }
+            
+            // Loading'i gizle, content'i göster
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'block';
+        }
+        
+        function showError() {
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'block';
+        }
+        
+        // Restoran view'ını kaydet (analytics için)
+        if (menuId) {
+            fetch(`/api/menu/view/${menuId}`, { method: 'POST' })
+                .catch(err => console.log('View tracking error:', err));
+        }
+    </script>
+</body>
+</html>

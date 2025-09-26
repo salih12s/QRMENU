@@ -141,7 +141,7 @@ const generateQRCode = async (req, res) => {
     const host = req.headers.host;
     const baseUrl = `${protocol}://${host}`;
     
-    const menuUrl = `${baseUrl}/menu/${restaurant.rows[0].qr_code}`;
+    const menuUrl = `${baseUrl}/?menu=${restaurant.rows[0].qr_code}`;
     console.log('Generated QR URL:', menuUrl);
     
     const qrCodeDataURL = await QRCode.toDataURL(menuUrl);

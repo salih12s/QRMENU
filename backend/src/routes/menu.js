@@ -5,6 +5,7 @@ const { authenticateToken, requireRestaurantAdmin } = require('../middleware/aut
 
 // Public route - QR kod ile menü görüntüleme
 router.get('/qr/:qrCode', menuController.getMenuByQR);
+router.post('/view/:qrCode', menuController.trackView);
 
 // Protected routes - Admin paneli için
 router.get('/restaurant/:restaurantId', authenticateToken, requireRestaurantAdmin, menuController.getRestaurantMenu);

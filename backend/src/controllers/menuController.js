@@ -308,6 +308,37 @@ const deleteMenuItem = async (req, res) => {
   }
 };
 
+const trackView = async (req, res) => {
+  try {
+    const { qrCode } = req.params;
+    
+    // Restoran bilgisini al
+    const restaurantResult = await pool.query(
+      'SELECT id FROM restaurants WHERE qr_code = $1 AND is_active = true',
+      [qrCode]
+    );
+
+    if (restaurantResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+
+    const restaurant = restaurantResult.rows[0];
+    const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+    
+    await pool.query(`
+      INSERT INTO restaurant_views (restaurant_id, ip_address, view_date, view_count)
+      VALUES ($1, $2, CURRENT_DATE, 1)
+      ON CONFLICT (restaurant_id, ip_address, view_date) 
+      DO UPDATE SET view_count = restaurant_views.view_count + 1
+    `, [restaurant.id, clientIp]);
+    
+    res.json({ message: 'View tracked' });
+  } catch (error) {
+    console.error('Track view error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   getMenuByQR,
   getRestaurantMenu,
@@ -316,5 +347,6 @@ module.exports = {
   deleteCategory,
   createMenuItem,
   updateMenuItem,
-  deleteMenuItem
+  deleteMenuItem,
+  trackView
 };
