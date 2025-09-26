@@ -32,6 +32,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve frontend build files in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, 'public');
+  app.use(express.static(frontendBuildPath));
+  console.log('Serving frontend from:', frontendBuildPath);
+}
+
 // Routes
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/restaurants', require('./src/routes/restaurants'));
@@ -58,9 +65,19 @@ app.post('/api/test-login', (req, res) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Endpoint not found' });
+// Catch-all handler for frontend routes (SPA)
+app.get('*', (req, res) => {
+  // If it's an API request, return 404
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  
+  // For frontend routes, serve index.html in production
+  if (process.env.NODE_ENV === 'production') {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+  } else {
+    res.status(404).json({ message: 'Endpoint not found' });
+  }
 });
 
 // Error handler
