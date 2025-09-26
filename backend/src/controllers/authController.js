@@ -12,9 +12,9 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Username and password required' });
     }
 
-    // Kullanıcıyı veritabanından bul
+    // Kullanıcıyı veritabanından bul (username veya email ile)
     const result = await pool.query(
-      'SELECT * FROM users WHERE username = $1',
+      'SELECT * FROM users WHERE username = $1 OR email = $1',
       [username]
     );
 
