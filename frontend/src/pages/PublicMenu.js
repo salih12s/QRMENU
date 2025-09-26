@@ -247,7 +247,8 @@ const PublicMenu = () => {
                 }}
                 alignItems="stretch"
               >
-                {menuData?.categories?.map((category) => (
+                {menuData?.categories?.length > 0 ? (
+                  menuData.categories.map((category) => (
                   <Grid 
                     item 
                     xs={12} 
@@ -330,7 +331,23 @@ const PublicMenu = () => {
                       </CardContent>
                     </Card>
                   </Grid>
-                ))}
+                  ))
+                ) : (
+                  <Grid item xs={12}>
+                    <Card sx={{ textAlign: 'center', py: 6 }}>
+                      <CardContent>
+                        <RestaurantIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+                        <Typography variant="h5" gutterBottom color="text.secondary">
+                          Henüz Menü Eklenmemiş
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                          Bu restoran henüz menü kategorileri ve yemeklerini eklemeyi tamamlamamış. 
+                          Lütfen daha sonra tekrar kontrol edin.
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )}
               </Grid>
             </Box>
           ) : (

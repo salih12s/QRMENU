@@ -136,7 +136,13 @@ const generateQRCode = async (req, res) => {
       return res.status(404).json({ message: 'Restaurant not found' });
     }
 
-    const menuUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/menu/${restaurant.rows[0].qr_code}`;
+    // Dinamik olarak current host'u kullan
+    const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const host = req.headers.host;
+    const baseUrl = `${protocol}://${host}`;
+    
+    const menuUrl = `${baseUrl}/menu/${restaurant.rows[0].qr_code}`;
+    console.log('Generated QR URL:', menuUrl);
     
     const qrCodeDataURL = await QRCode.toDataURL(menuUrl);
 

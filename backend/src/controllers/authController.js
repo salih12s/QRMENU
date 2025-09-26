@@ -64,8 +64,15 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   try {
     const { username, email, password, role, restaurant_id } = req.body;
+    console.log('Register attempt:', { username, email, password: password ? 'SET' : 'MISSING', role, restaurant_id });
 
     if (!username || !email || !password || !role) {
+      console.log('Missing fields:', { 
+        username: !username ? 'MISSING' : 'OK', 
+        email: !email ? 'MISSING' : 'OK', 
+        password: !password ? 'MISSING' : 'OK', 
+        role: !role ? 'MISSING' : 'OK' 
+      });
       return res.status(400).json({ message: 'All fields required' });
     }
 
