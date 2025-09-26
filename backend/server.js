@@ -60,12 +60,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend build files in production
-if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, 'public');
-  app.use(express.static(frontendBuildPath));
-  console.log('Serving frontend from:', frontendBuildPath);
-}
+// Serve frontend build files (always serve in Railway)
+const frontendBuildPath = path.join(__dirname, 'public');
+app.use(express.static(frontendBuildPath));
+console.log('Serving frontend from:', frontendBuildPath);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
 // Routes
 app.use('/api/auth', require('./src/routes/auth'));
@@ -100,11 +99,20 @@ app.get('*', (req, res) => {
     return res.status(404).json({ message: 'API endpoint not found' });
   }
   
-  // For frontend routes, serve index.html in production
-  if (process.env.NODE_ENV === 'production') {
-    res.sendFile(path.join(__dirname, 'public/index.html'));
+  // For all frontend routes, serve index.html (SPA routing)
+  const indexPath = path.join(__dirname, 'public/index.html');
+  console.log('Serving SPA route:', req.path, 'from:', indexPath);
+  
+  // Check if index.html exists
+  if (require('fs').existsSync(indexPath)) {
+    res.sendFile(indexPath);
   } else {
-    res.status(404).json({ message: 'Endpoint not found' });
+    console.error('index.html not found at:', indexPath);
+    res.status(404).json({ 
+      message: 'Frontend not found',
+      path: indexPath,
+      exists: false
+    });
   }
 });
 
