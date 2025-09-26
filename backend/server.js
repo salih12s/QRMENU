@@ -2,11 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// Production için environment variables yükle
-if (process.env.NODE_ENV === 'production') {
-  require('dotenv').config({ path: '.env.production' });
-} else {
-  require('dotenv').config();
+// Environment variables yükle - Railway kendi variables kullanır
+require('dotenv').config();
+
+// Railway'de NODE_ENV otomatik set edilir
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'production';
 }
 
 const app = express();
@@ -19,13 +20,40 @@ console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
 console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'SET' : 'NOT SET');
 console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
 
-// Middleware
+// Middleware - Production için esnek CORS
+const allowedOrigins = [
+  'https://menuben.com',
+  'https://qrmenu-production-fb4e.up.railway.app',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://menuben.com',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'origin'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 }));
+// Handle preflight OPTIONS requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
