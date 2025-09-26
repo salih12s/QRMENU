@@ -1,13 +1,16 @@
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
-require('dotenv').config();
+
+// Production için environment variables yükle
+if (process.env.NODE_ENV === 'production') {
+  require('dotenv').config({ path: '.env.production' });
+} else {
+  require('dotenv').config();
+}
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 async function createSuperAdmin() {
@@ -23,18 +26,19 @@ async function createSuperAdmin() {
       return;
     }
 
-    // Şifreyi hashle (12345)
-    const hashedPassword = await bcrypt.hash('12345', 10);
+    // Şifreyi hashle (123456)
+    const hashedPassword = await bcrypt.hash('123456', 10);
 
     // Super admin kullanıcısını oluştur
     await pool.query(
       'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4)',
-      ['superadmin', 'admin@qrmenu.com', hashedPassword, 'super_admin']
+      ['superadmin', 'admin@menuben.com', hashedPassword, 'super_admin']
     );
 
     console.log('Super admin kullanıcısı başarıyla oluşturuldu!');
+    console.log('Email: admin@menuben.com');
     console.log('Kullanıcı Adı: superadmin');
-    console.log('Şifre: 12345');
+    console.log('Şifre: 123456');
   } catch (error) {
     console.error('Hata:', error);
   } finally {
