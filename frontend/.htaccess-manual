@@ -1,0 +1,18 @@
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+
+# Statik dosyaları aynen ver
+RewriteRule ^static/ - [L]
+RewriteRule ^assets/ - [L]
+RewriteRule ^favicon\.ico$ - [L]
+RewriteRule ^manifest\.json$ - [L]
+RewriteRule ^robots\.txt$ - [L]
+
+# Var olan dosya/klasörse dokunma
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule . - [L]
+
+# Geri kalan her şeyi SPA için index.html'e yönlendir
+RewriteRule ^ index.html [L]

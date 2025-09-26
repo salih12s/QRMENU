@@ -10,7 +10,6 @@ import {
   Box,
   Alert,
   CircularProgress,
-  Card,
   CardContent,
   InputAdornment,
   IconButton
@@ -238,29 +237,6 @@ const Login = () => {
                     'Giriş Yap'
                   )}
                 </Button>
-
-                {/* Demo Accounts Info */}
-                <Card
-                  variant="outlined"
-                  sx={{
-                    mt: 3,
-                    borderRadius: 2,
-                    backgroundColor: '#f8f9fa',
-                    borderColor: '#e9ecef',
-                  }}
-                >
-                  <CardContent sx={{ p: 2 }}>
-                    <Typography variant="subtitle2" color="primary" gutterBottom>
-                      Demo Hesaplar:
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Super Admin:</strong> superadmin / 12345
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Restaurant Admin:</strong> saydam / 12345
-                    </Typography>
-                  </CardContent>
-                </Card>
               </Box>
             </CardContent>
           </Paper>
