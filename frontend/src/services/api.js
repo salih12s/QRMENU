@@ -8,6 +8,7 @@ console.log('Environment variable:', process.env.REACT_APP_API_URL);
 // Axios instance oluştur
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 });
 
 // Request interceptor - token'ı otomatik ekle
