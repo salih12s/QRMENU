@@ -50,7 +50,8 @@ async function testQueries() {
         }
       });
       
-      console.log(`\n🔗 Public Menü URL: http://localhost:5173/menu/${firstRestaurant.qr_code}`);
+      const frontendUrl = process.env.FRONTEND_URL || 'https://menuben.com';
+      console.log(`\n🔗 Public Menü URL: ${frontendUrl}/menu/${firstRestaurant.qr_code}`);
     }
     
     // 6. Access logs kontrol et

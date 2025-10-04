@@ -75,8 +75,9 @@ export const createRestaurant = async (req: Request, res: Response): Promise<voi
     const qrCode = `${name.replace(/\s+/g, '-').toUpperCase()}-${Date.now()}`;
     
     // QR kod görselini oluştur
+    const frontendUrl = process.env.FRONTEND_URL || 'https://menuben.com';
     const qrCodeImage = await QRCode.toDataURL(
-      `${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu/${qrCode}`
+      `${frontendUrl}/menu/${qrCode}`
     );
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -244,8 +245,9 @@ export const regenerateQRCode = async (req: Request, res: Response): Promise<voi
     const name = restaurantResult.rows[0].name;
     const qrCode = `${name.replace(/\s+/g, '-').toUpperCase()}-${Date.now()}`;
     
+    const frontendUrl = process.env.FRONTEND_URL || 'https://menuben.com';
     const qrCodeImage = await QRCode.toDataURL(
-      `${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu/${qrCode}`
+      `${frontendUrl}/menu/${qrCode}`
     );
 
     const result = await query<Restaurant>(

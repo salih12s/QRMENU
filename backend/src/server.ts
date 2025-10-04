@@ -18,13 +18,29 @@ const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'https://menuben.com',
+  process.env.ALLOWED_ORIGIN || 'https://menuben.com',
+  'https://menuben.com',
+  'https://www.menuben.com'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Static files (uploads)
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
@@ -67,7 +83,12 @@ app.use((_req: Request, res: Response) => {
 // Start server
 app.listen(PORT, () => {
   console.log('\n🚀 ========================================');
-  console.log(`✅ Server çalışıyor: http://localhost:${PORT}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`✅ Server çalışıyor (Production): https://qrmenu-production-857b.up.railway.app`);
+    console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'https://menuben.com'}`);
+  } else {
+    console.log(`✅ Server çalışıyor (Development): http://localhost:${PORT}`);
+  }
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️  Database: ${process.env.DB_NAME}`);
   console.log('========================================\n');
