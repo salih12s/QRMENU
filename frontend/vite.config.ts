@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: './', // Relative paths için - Hostinger/cPanel uyumlu
+  define: {
+    'import.meta.env.VITE_API_URL': JSON.stringify('https://qrmenu-production-857b.up.railway.app/api')
+  },
   server: {
     port: 5173,
     proxy: {
