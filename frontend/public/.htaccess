@@ -1,0 +1,34 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # index.html'e dokunma
+  RewriteRule ^index\.html$ - [L]
+  
+  # Fiziksel dosya veya klasör değilse
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Her şeyi index.html'e yönlendir (React Router için)
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# JavaScript ve CSS dosyaları için doğru MIME tipleri
+AddType application/javascript .js
+AddType text/css .css
+
+# Cache kontrolü (opsiyonel - performans için)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Gzip compression (opsiyonel - hız için)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript
+</IfModule>

@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: './', // Relative paths için - Hostinger/cPanel uyumlu
   server: {
     port: 5173,
     proxy: {
@@ -21,6 +22,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'terser',
+    assetsDir: 'assets',
     rollupOptions: {
       output: {
         manualChunks: {
